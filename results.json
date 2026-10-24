@@ -1,0 +1,202 @@
+{
+ "round0/keyword rules": {
+  "wording A (same as training)": {
+   "catch_rate": 0.623,
+   "false_alarm_rate": 0.027,
+   "money_protected": 0.614,
+   "auc": 0.93
+  },
+  "wording B (switched)": {
+   "catch_rate": 0.006,
+   "false_alarm_rate": 0.0,
+   "money_protected": 0.007,
+   "auc": 0.643
+  },
+  "wording C (never seen)": {
+   "catch_rate": 0.006,
+   "false_alarm_rate": 0.0,
+   "money_protected": 0.007,
+   "auc": 0.645
+  },
+  "new scam type, wording C": {
+   "catch_rate": 0.005,
+   "false_alarm_rate": 0.0,
+   "money_protected": 0.007,
+   "auc": 0.652
+  },
+  "_persona_far": {
+   "older_cautious": 0.006,
+   "young_busy": 0.007,
+   "small_business": 0.006,
+   "new_to_country": 0.008
+  }
+ },
+ "round0/payment context only": {
+  "wording A (same as training)": {
+   "catch_rate": 0.845,
+   "false_alarm_rate": 0.029,
+   "money_protected": 0.898,
+   "auc": 0.973
+  },
+  "wording B (switched)": {
+   "catch_rate": 0.843,
+   "false_alarm_rate": 0.029,
+   "money_protected": 0.906,
+   "auc": 0.971
+  },
+  "wording C (never seen)": {
+   "catch_rate": 0.85,
+   "false_alarm_rate": 0.029,
+   "money_protected": 0.916,
+   "auc": 0.974
+  },
+  "new scam type, wording C": {
+   "catch_rate": 0.866,
+   "false_alarm_rate": 0.031,
+   "money_protected": 0.918,
+   "auc": 0.974
+  },
+  "_persona_far": {
+   "older_cautious": 0.021,
+   "young_busy": 0.035,
+   "small_business": 0.029,
+   "new_to_country": 0.032
+  }
+ },
+ "round0/text + context model": {
+  "wording A (same as training)": {
+   "catch_rate": 0.988,
+   "false_alarm_rate": 0.045,
+   "money_protected": 0.996,
+   "auc": 0.998
+  },
+  "wording B (switched)": {
+   "catch_rate": 0.87,
+   "false_alarm_rate": 0.011,
+   "money_protected": 0.914,
+   "auc": 0.989
+  },
+  "wording C (never seen)": {
+   "catch_rate": 0.854,
+   "false_alarm_rate": 0.01,
+   "money_protected": 0.905,
+   "auc": 0.988
+  },
+  "new scam type, wording C": {
+   "catch_rate": 0.849,
+   "false_alarm_rate": 0.01,
+   "money_protected": 0.903,
+   "auc": 0.987
+  },
+  "_persona_far": {
+   "older_cautious": 0.012,
+   "young_busy": 0.02,
+   "small_business": 0.03,
+   "new_to_country": 0.015
+  }
+ },
+ "round1/keyword rules": {
+  "wording A (same as training)": {
+   "catch_rate": 0.623,
+   "false_alarm_rate": 0.027,
+   "money_protected": 0.614,
+   "auc": 0.93
+  },
+  "wording B (switched)": {
+   "catch_rate": 0.006,
+   "false_alarm_rate": 0.0,
+   "money_protected": 0.007,
+   "auc": 0.643
+  },
+  "wording C (never seen)": {
+   "catch_rate": 0.006,
+   "false_alarm_rate": 0.0,
+   "money_protected": 0.007,
+   "auc": 0.645
+  },
+  "new scam type, wording C": {
+   "catch_rate": 0.005,
+   "false_alarm_rate": 0.0,
+   "money_protected": 0.007,
+   "auc": 0.652
+  },
+  "_persona_far": {
+   "older_cautious": 0.006,
+   "young_busy": 0.007,
+   "small_business": 0.006,
+   "new_to_country": 0.008
+  }
+ },
+ "round1/payment context only": {
+  "wording A (same as training)": {
+   "catch_rate": 0.861,
+   "false_alarm_rate": 0.029,
+   "money_protected": 0.917,
+   "auc": 0.977
+  },
+  "wording B (switched)": {
+   "catch_rate": 0.86,
+   "false_alarm_rate": 0.029,
+   "money_protected": 0.932,
+   "auc": 0.975
+  },
+  "wording C (never seen)": {
+   "catch_rate": 0.866,
+   "false_alarm_rate": 0.029,
+   "money_protected": 0.932,
+   "auc": 0.979
+  },
+  "new scam type, wording C": {
+   "catch_rate": 0.881,
+   "false_alarm_rate": 0.031,
+   "money_protected": 0.933,
+   "auc": 0.978
+  },
+  "_persona_far": {
+   "older_cautious": 0.021,
+   "young_busy": 0.035,
+   "small_business": 0.029,
+   "new_to_country": 0.032
+  }
+ },
+ "round1/text + context model": {
+  "wording A (same as training)": {
+   "catch_rate": 0.988,
+   "false_alarm_rate": 0.034,
+   "money_protected": 0.995,
+   "auc": 0.998
+  },
+  "wording B (switched)": {
+   "catch_rate": 0.989,
+   "false_alarm_rate": 0.036,
+   "money_protected": 0.996,
+   "auc": 0.998
+  },
+  "wording C (never seen)": {
+   "catch_rate": 0.916,
+   "false_alarm_rate": 0.01,
+   "money_protected": 0.951,
+   "auc": 0.994
+  },
+  "new scam type, wording C": {
+   "catch_rate": 0.9,
+   "false_alarm_rate": 0.008,
+   "money_protected": 0.938,
+   "auc": 0.993
+  },
+  "_persona_far": {
+   "older_cautious": 0.019,
+   "young_busy": 0.021,
+   "small_business": 0.028,
+   "new_to_country": 0.02
+  }
+ },
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "target_false_alarm_rate": 0.03
+}
