@@ -64,3 +64,21 @@ def test_api_holds_obvious_case_and_allows_plain_one():
         lo = c.post("/screen", json={"text": "Rent is due today, can you send it? Sending the rent now, thanks.", "amount": 3000, "typical_amount": 3000, "new_payee": False}).json()
         assert hi["action"] == "hold_for_callback" and hi["because"]
         assert lo["action"] == "allow"
+
+
+def test_api_rejects_bad_input_and_serves_demo():
+    from arena import api
+    with TestClient(api.app) as c:
+        assert c.get("/health").json() == {"status": "ok", "model_ready": True}
+        page = c.get("/")
+        assert page.status_code == 200 and "ScamShield Arena" in page.text
+        bad = [{"text": "", "amount": 10}, {"text": "hi", "amount": -5}, {"text": "hi", "amount": 10, "typical_amount": 0},
+               {"text": "x" * 5001, "amount": 10}, {"amount": 10}]
+        assert all(c.post("/screen", json=b).status_code == 422 for b in bad)
+
+
+def test_report_writes_figures(tmp_path, monkeypatch):
+    from arena import report
+    monkeypatch.setattr(report, "OUT", tmp_path)
+    report.main()
+    assert {p.name for p in tmp_path.glob("*.png")} == {"arms_race.png", "fairness.png", "pipeline.png"}
