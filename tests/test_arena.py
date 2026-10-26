@@ -82,3 +82,15 @@ def test_report_writes_figures(tmp_path, monkeypatch):
     monkeypatch.setattr(report, "OUT", tmp_path)
     report.main()
     assert {p.name for p in tmp_path.glob("*.png")} == {"arms_race.png", "fairness.png", "pipeline.png"}
+
+
+def test_extras_and_extra_figures(tmp_path, monkeypatch):
+    from arena import extras, figures_extra
+    ex = extras.analyse(seeds=[1])
+    assert set(ex["catch_by_scam_type_text_round1_wording_C"]) == set(SEEN_TYPES) | set(HELD_OUT_TYPES)
+    assert all(0 <= v <= 1 for v in ex["realised_false_alarm_rate"].values())
+    (tmp_path / "results_extra.json").write_text(__import__("json").dumps(ex))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(figures_extra, "OUT", tmp_path / "img")
+    figures_extra.main()
+    assert {p.name for p in (tmp_path / "img").glob("*.png")} == {"tradeoff.png", "by_scam_type.png", "score_spread.png", "wording_sets.png"}

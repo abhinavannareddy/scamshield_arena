@@ -2,53 +2,84 @@
 
 ![How the arena works](docs/img/pipeline.png)
 
-A small arena for testing scam defences. Scripted "scammers" change their wording when they are caught, and a "guardian" decides whether to hold a payment for a human call-back. The arena measures how many scams are stopped, how many honest payments are wrongly held, and whether the guardian treats different customer groups equally.
+Scammers change their words as soon as a phrase gets caught. A defence that was tested only on yesterday's wording can look great and then fail the week after. ScamShield Arena is a small, safe test bench for that problem. Scripted "scammers" reword their pitch, a "guardian" decides whether to hold a payment for a human call-back, and the arena measures three things: how many scams are stopped, how many honest payments are held by mistake, and whether different customer groups are treated equally.
 
-**Everything here is synthetic and deliberately generic.** Conversations are built from short template phrases that express well-known warning signs (urgency, secrecy, pressure to move money). There are no real names, brands, numbers, scripts or step-by-step methods. This is a test bench for defence, not a guide to scamming.
+**Everything here is synthetic.** Conversations are built from short template phrases that express well-known warning signs: urgency, secrecy, pressure to move money. There are no real names, brands, numbers, scripts or step-by-step methods. This is a test bench for defence, not a guide to scamming.
 
-## What is in it
-
-- `arena/scenarios.py`: five scam types and seven kinds of honest conversation, four customer groups (older and cautious, young and busy, small business, new to the country). Three wording sets: A (common), B (what scammers switch to), C (never used in training). One scam type, `tech_support`, is never used in training.
-- Hard cases: 30% of scams show only one warning sign, scams borrow ordinary cover phrases, and 30% of honest conversations contain a warning-sign phrase (a real landlord saying "urgent", a surprise party kept "secret").
-- `arena/guardian.py`: three guardians: fixed keyword rules, payment context only (new payee, amount versus usual), and a text-plus-context model (TF-IDF with logistic regression).
-- `arena/evaluate.py`: round 0 trains on wording A. Round 1 retrains after scammers switch to B. Wording C and the new scam type are never trained on. Each guardian's threshold is set on validation data to allow about 3% false alarms. Averaged over 5 seeds.
-- `arena/api.py`: `POST /screen` returns `allow` or `hold_for_callback` with the words that drove the score. A hold means a person checks with the customer. The customer is never accused.
-
-## Run
+## Try it
 
 ```
 pip install -r requirements.txt
 python -m pytest -q
-python -m arena.evaluate     # writes results.json (deterministic, about 6 seconds)
-python -m arena.report       # redraws the figures in docs/img from results.json
-uvicorn arena.api:app        # then open http://127.0.0.1:8000/ for the live demo
+uvicorn arena.api:app
 ```
 
-Open `/` for an interactive page: pick a preset conversation (including a reworded scam and an honest surprise-party message), change the amount, and see the verdict, a risk meter against the hold threshold, and the words that drove the score. `GET /health` reports whether the model is ready. `POST /screen` rejects empty text, non-positive amounts and text over 5,000 characters with a 422.
+Then open http://127.0.0.1:8000/. Pick a preset conversation (a bank-style scam, the same scam reworded, a plain rent payment, an honest surprise-party message), change the amount, and see the verdict, a risk meter against the hold threshold, and the words that pushed the score up.
 
-## Results (5 seeds, `results.json`, catch rate at about 3% false alarms)
+For the API, `POST /screen` returns `allow` or `hold_for_callback` and the words behind a hold. A hold means a person checks with the customer. The customer is never accused. Empty text, non-positive amounts and text over 5,000 characters get a 422. `GET /health` says whether the model is ready.
 
-| Guardian | Wording A | B (switched) | C (unseen) | New scam type |
+## What happens when scammers reword
+
+![Catch rate as wording changes](docs/img/arms_race.png)
+
+Catch rate at about 3% false alarms on validation data, averaged over 5 seeds (`results.json`):
+
+| Guardian | Wording A | B (switched) | C (unseen) | New mix of warning signs |
 |---|---|---|---|---|
 | Keyword rules | 62% | 1% | 1% | 1% |
 | Payment context only | 85% | 84% | 85% | 87% |
 | Text + context, round 0 | 99% | 87% | 85% | 85% |
 | Text + context, round 1 (retrained with B) | 99% | 99% | 92% | 90% |
 
-![Catch rate as wording changes](docs/img/arms_race.png)
-
 - Fixed keyword rules collapse as soon as scammers reword.
-- Payment context alone is stable but caps around 85%, because it cannot see the conversation.
-- The text model loses 12 points when wording changes, and retraining on what scammers did last round recovers most of it. Retraining does not fully cover wording it has never seen (92%).
-- False-alarm rate by customer group for the round-1 text model: older and cautious 1.9%, young and busy 2.1%, small business 2.8%, new to the country 2.0%. The gaps are small here, but the groups differ only in a few template phrases. This does not show the system is fair for real customers.
+- Looking only at the payment is steady but tops out around 85%, because it never reads the conversation.
+- The text model loses 12 points when the wording changes. Retraining on what scammers used last round wins most of that back, but wording it has never seen still costs about 7 points.
+- The last column is tech support, which is never used in training. It reuses warning signs the model has seen in other scam types, so it is a new mix, not a new language. The [audit](docs/AUDIT.md) explains this.
+
+More charts and the full reading of the results are in [docs/FINDINGS.md](docs/FINDINGS.md), including the trade-off between catching more scams and holding more honest payments:
+
+![Trade-off](docs/img/tradeoff.png)
+
+## Is it fair across customer groups?
 
 ![False alarms by customer group](docs/img/fairness.png)
 
+For the retrained text model, honest payments held by mistake were 1.9% for older and cautious customers, 2.1% for young and busy, 2.8% for small businesses and 2.0% for people new to the country. Small businesses are held about 47% more often, and most of that comes from supplier-invoice conversations. The groups differ only in a few template phrases, so this does not show the system is fair for real customers. It shows the kind of check to run on real data.
+
+## What is in the repository
+
+| Path | What it does |
+|---|---|
+| `arena/scenarios.py` | Generates the conversations: 7 tactics, 5 scam types, 7 honest situations, 4 customer groups, 3 wording sets (A, B, C) |
+| `arena/guardian.py` | The three guardians: keyword rules, payment context only, text + context model |
+| `arena/evaluate.py` | Runs the rounds over 5 seeds and writes `results.json` |
+| `arena/extras.py` | Per-scam-type catch, realised false-alarm rates and the trade-off curve (`results_extra.json`) |
+| `arena/report.py`, `arena/figures_extra.py` | Draw every figure in `docs/img` from the results files |
+| `arena/api.py`, `arena/static/` | The screening service and the demo page |
+| `tests/` | 12 tests: data generation, guardians, thresholds, the API and the figures |
+| `docs/` | [Method](docs/METHOD.md), [findings](docs/FINDINGS.md) and an [audit of this project's own claims](docs/AUDIT.md) |
+
+To regenerate the results and charts:
+
+```
+python -m arena.evaluate
+python -m arena.extras
+python -m arena.report
+python -m arena.figures_extra
+```
+
 ## Limits
 
-- The data is template text with a small vocabulary. Real scams are far more varied, and real conversations are messier, so real catch rates will be lower. I first built an easier version and got 100% on unseen wording, which is how I know the harder cases matter.
+- The data is template text with a small vocabulary. Real scams are far more varied and real conversations are messier, so real catch rates will be lower. An easier first version of this bench scored 100% on unseen wording, which is how I learned the harder cases matter.
+- At real-world rates, where almost every payment is honest, most holds would still be honest customers. See the worked example in [docs/FINDINGS.md](docs/FINDINGS.md).
 - The scammers are scripted, not an LLM. The "arena" is a simple retrain loop, not a learning opponent.
+- The 3% false-alarm target is set on validation data. Realised rates on the test sets ranged from 0% to 3.6%. See the [audit](docs/AUDIT.md).
+- Five seeds, no confidence intervals. Treat differences of a point or two as noise.
 - No real languages, voice calls or message metadata are covered.
+
+## How it was made
+
+I built the idea with the help of an AI assistant (Claude) and then tested and reviewed it. Every number and figure above comes from code in this repository and can be regenerated with the commands shown. The [audit](docs/AUDIT.md) records what was checked and what was corrected.
 
 ## Author
 
